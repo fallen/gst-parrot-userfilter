@@ -100,13 +100,13 @@ enum
 static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE ("sink",
     GST_PAD_SINK,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("video/x-raw, format=BGR")
+    GST_STATIC_CAPS ("video/x-raw, format=YUY2")
     );
 
 static GstStaticPadTemplate src_factory = GST_STATIC_PAD_TEMPLATE ("src",
     GST_PAD_SRC,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("video/x-raw, format=BGR")
+    GST_STATIC_CAPS ("video/x-raw, format=YUY2")
     );
 
 #define gst_my_filter_parent_class parent_class
