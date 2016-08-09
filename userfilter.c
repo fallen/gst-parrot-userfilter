@@ -189,10 +189,10 @@ gst_my_filter_transform_frame_ip (GstVideoFilter *trans, GstVideoFrame *frame)
   bufsize = gst_buffer_get_size (buf);
 
   while ((client = pomp_ctx_get_next_conn(pomp_ctx, client)) != NULL) {
-  /* just push out the incoming buffer without touching it */
-//  return gst_pad_push (trans->srcpad, buf);
     pomp_conn_send(client, SEND_FD, "%x %u %u %u %u", fd, bufsize, frame->info.finfo->format, frame->info.width, frame->info.height);
-//    pomp_recv(); // FIXME: read the buffer back
+    if (pomp_ctx_wait_and_process(pomp_ctx, 3000) < 0) {
+      g_warning("client didn't finish its buffer processing on time");
+    }
     g_info("looping on clients");
   }
   g_info("end of loop");
