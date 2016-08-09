@@ -8,6 +8,7 @@ LOCAL_MODULE_FILENAME := libgstparrotuserfilter.so
 LOCAL_DESTDIR := usr/lib/gstreamer-1.0
 
 LOCAL_LIBRARIES := glib gstreamer libpomp gst-plugins-base
+LOCAL_DEPENDS_HEADERS := libmuta
 
 LOCAL_CFLAGS := -DGST_USE_UNSTABLE_API
 
