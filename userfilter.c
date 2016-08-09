@@ -66,7 +66,9 @@
 #include <sys/socket.h>
 #include <stdint.h>
 #include <string.h>
+
 #include "libpomp.h"
+#include "libmuta.h"
 #include "userfilter.h"
 
 GST_DEBUG_CATEGORY_STATIC (gst_my_filter_debug);
@@ -250,7 +252,8 @@ gst_my_filter_init (GstMyFilter * filter)
   memset(&addr_storage, 0, sizeof(addr_storage));
   addr = (struct sockaddr *)&addr_storage;
   addrlen = sizeof(addr_storage);
-  pomp_addr_parse("unix:/facedetect_data/common/lol.sock", addr, &addrlen);
+  pomp_addr_parse(LIBMUTA_IMAGE_SOCKET, addr, &addrlen);
+
   server_start(addr, addrlen);
   task = gst_task_new(loop_task, &task, NULL);
   g_rec_mutex_init(&filter->mutex);
