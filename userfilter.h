@@ -69,6 +69,9 @@ struct _GstMyFilter
 {
   GstVideoFilter videofilter;
   GRecMutex mutex;
+  GCond usercond;
+  GMutex usermutex;
+  gboolean buffer_processed;
 
   gboolean silent;
 };

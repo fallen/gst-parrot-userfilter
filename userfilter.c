@@ -132,6 +132,7 @@ static void server_event_cb(struct pomp_ctx *ctx, enum pomp_event event,
                 void *userdata)
 {
   uint32_t msgid;
+  GstMyFilter *filter = userdata;
 
   switch(event) {
     case POMP_EVENT_CONNECTED:
@@ -144,6 +145,12 @@ static void server_event_cb(struct pomp_ctx *ctx, enum pomp_event event,
 
     case POMP_EVENT_MSG:
       msgid = pomp_msg_get_id(msg);
+      if (msgid == BUFFER_PROCESSING_DONE) {
+        g_mutex_lock(&filter->usermutex);
+        filter->buffer_processed = TRUE;
+        g_mutex_unlock(&filter->usermutex);
+        g_cond_signal(&filter->usercond);
+      }
       g_info("got message id %d", msgid);
       break;
 
@@ -181,6 +188,7 @@ gst_my_filter_transform_frame_ip (GstVideoFilter *trans, GstVideoFrame *frame)
   unsigned int bufsize;
   int fd;
   GstBuffer *buf = frame->buffer;
+  GstMyFilter *filter = GST_MYFILTER (trans);
 
   g_assert (1 == gst_buffer_n_memory (buf));
   GstMemory *mem = gst_buffer_peek_memory (buf, 0);
@@ -189,10 +197,18 @@ gst_my_filter_transform_frame_ip (GstVideoFilter *trans, GstVideoFrame *frame)
   bufsize = gst_buffer_get_size (buf);
 
   while ((client = pomp_ctx_get_next_conn(pomp_ctx, client)) != NULL) {
+    gint64 end_time;
+    g_mutex_lock(&filter->usermutex);
+    filter->buffer_processed = FALSE;
     pomp_conn_send(client, SEND_FD, "%x %u %u %u %u", fd, bufsize, frame->info.finfo->format, frame->info.width, frame->info.height);
-    if (pomp_ctx_wait_and_process(pomp_ctx, 3000) < 0) {
-      g_warning("client didn't finish its buffer processing on time");
+    end_time = g_get_monotonic_time () + 3 * G_TIME_SPAN_SECOND;
+    while (!filter->buffer_processed) {
+      if (!g_cond_wait_until (&filter->usercond, &filter->usermutex, end_time)) {
+        g_warning("client took too long to process video buffer");
+        break;
+      }
     }
+    g_mutex_unlock (&filter->usermutex);
     g_info("looping on clients");
   }
   g_info("end of loop");
@@ -247,7 +263,7 @@ gst_my_filter_init (GstMyFilter * filter)
   struct sockaddr *addr = NULL;
   uint32_t addrlen = 0;
 
-  pomp_ctx = pomp_ctx_new(server_event_cb, NULL);
+  pomp_ctx = pomp_ctx_new(server_event_cb, filter);
   pomp_loop = pomp_ctx_get_loop(pomp_ctx);
   memset(&addr_storage, 0, sizeof(addr_storage));
   addr = (struct sockaddr *)&addr_storage;
@@ -256,6 +272,8 @@ gst_my_filter_init (GstMyFilter * filter)
 
   server_start(addr, addrlen);
   task = gst_task_new(loop_task, &task, NULL);
+  g_mutex_init(&filter->usermutex);
+  g_cond_init(&filter->usercond);
   g_rec_mutex_init(&filter->mutex);
   gst_task_set_lock(task, &filter->mutex);
   gst_task_start(task);
