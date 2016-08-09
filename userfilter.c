@@ -3,7 +3,7 @@
  * Copyright (C) 2005 Thomas Vander Stichele <thomas@apestaart.org>
  * Copyright (C) 2005 Ronald S. Bultje <rbultje@ronald.bitfreak.net>
  * Copyright (C) 2016 Yann Sionneau <<yann.sionneau@parrot.com>>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -190,7 +190,7 @@ gst_my_filter_transform_frame_ip (GstVideoFilter *trans, GstVideoFrame *frame)
   /* just push out the incoming buffer without touching it */
 //  return gst_pad_push (trans->srcpad, buf);
     pomp_conn_send(client, SEND_FD, "%x %u %u %u %u", fd, bufsize, frame->info.finfo->format, frame->info.width, frame->info.height);
-    pomp_recv(); // FIXME: read the buffer back
+//    pomp_recv(); // FIXME: read the buffer back
     g_info("looping on clients");
   }
   g_info("end of loop");
