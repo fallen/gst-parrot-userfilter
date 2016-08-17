@@ -93,21 +93,31 @@ enum
   PROP_SILENT
 };
 
+
+#define CSP_VIDEO_CAPS GST_VIDEO_CAPS_MAKE (GST_VIDEO_FORMATS_ALL) ";" \
+    GST_VIDEO_CAPS_MAKE_WITH_FEATURES ("ANY", GST_VIDEO_FORMATS_ALL)
+
 /* the capabilities of the inputs and outputs.
  *
  * describe the real formats here.
  */
-static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE ("sink",
+static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE(
+    "sink",
     GST_PAD_SINK,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("video/x-raw, format=YUY2")
-    );
+    GST_STATIC_CAPS("video/x-raw, format=YUY2")
+//    GST_STATIC_CAPS(CSP_VIDEO_CAPS)
+	);
 
-static GstStaticPadTemplate src_factory = GST_STATIC_PAD_TEMPLATE ("src",
+
+static GstStaticPadTemplate src_factory = GST_STATIC_PAD_TEMPLATE(
+    "src",
     GST_PAD_SRC,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("video/x-raw, format=YUY2")
-    );
+    GST_STATIC_CAPS("video/x-raw, format=YUY2")
+    //GST_STATIC_CAPS(CSP_VIDEO_CAPS)
+	);
+
 
 #define gst_my_filter_parent_class parent_class
 G_DEFINE_TYPE (GstMyFilter, gst_my_filter, GST_TYPE_VIDEO_FILTER);
