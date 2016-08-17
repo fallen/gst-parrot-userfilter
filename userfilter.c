@@ -184,7 +184,7 @@ static int server_start(const struct sockaddr *addr, uint32_t addrlen)
 
 void loop_task(gpointer user_data)
 {
-  while (1);
+  while (1)
     pomp_loop_wait_and_process(pomp_loop, -1);
 
   if (!gst_task_stop(task))
