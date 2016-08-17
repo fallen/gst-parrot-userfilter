@@ -210,7 +210,7 @@ gst_my_filter_transform_frame_ip (GstVideoFilter *trans, GstVideoFrame *frame)
     gint64 end_time;
     g_mutex_lock(&filter->usermutex);
     filter->buffer_processed = FALSE;
-    pomp_conn_send(client, SEND_FD, "%x %u %u %u %u", fd, bufsize, frame->info.finfo->format, frame->info.width, frame->info.height);
+    pomp_conn_send(client, SEND_FD, "%x%u%u%u%u", fd, bufsize, frame->info.finfo->format, frame->info.width, frame->info.height);
     end_time = g_get_monotonic_time () + 3 * G_TIME_SPAN_SECOND;
     while (!filter->buffer_processed) {
       if (!g_cond_wait_until (&filter->usercond, &filter->usermutex, end_time)) {
